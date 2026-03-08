@@ -1,0 +1,60 @@
+id: "full_sep_ncmrwf_data"
+
+data:
+  #path: "Monsoon_Data/Processed_Data/intermediate/cv_data_new_pipeline.rds"
+  path: "Monsoon_Data/Processed_Data/Combined/mo_onset_combined_ncmrwf_combined_wide.rds"
+  year_min: 2000
+  year_max: 2015
+  filter_fn: "default_filter"
+
+targets:
+  max_day: 28
+  plus_label: "day_29plus"
+
+forecasts:
+  systems:
+    ngcm:
+      prefix: "ngcm_p_onset_day_"      # day_1..day_max columns
+      plus_col: "ngcm_p_onset_day_29plus"
+
+    aifs:
+      prefix: "aifs_p_onset_day_"        # day_1..day_max columns
+      plus_col: "aifs_p_onset_day_29plus"
+
+climatology:
+  prefix: "clim_p_onset_day_"     # prefix for day_1..max_day
+  plus_col: "clim_p_onset_day_29plus"
+
+
+smoothing:
+  ngcm: "none"   # or "none" # originally "unimodal_param"
+  aifs: "none"   # or "none" # originally "unimodal_param"
+
+design:
+  #the formula will be expanded by expand_formula
+  #needs to be a polynomial in "clim" and the entries in systems (above)
+  #"clim" will be the climatological prior, others will be (smoothed) likelihoods in the multinomial logit
+  #similar to how R interprets regression notation. Main difference: ngcm*ngcm will produce both an ngcm term and an ngcm^2 term
+   
+  formula: "clim *(ngcm + aifs)"
+
+  # Optional: prior SDs for individual terms.
+  # Any term omitted defaults to prior_sd = 2.
+  # terms should be ordered in alphabeticaly order to match the output of expand_formula in funs/regression_designs.R
+  priors:
+    clim: 2.0
+    ngcm: 2.0
+    aifs: 2.0
+    "ngcm:aifs": 1.0
+    "aifs:clim:ngcm": 1.0
+    "clim:ngcm": 1.0
+    "clim:aifs": 1.0
+
+
+stan_model:
+  file: "stan/multinom_blocks.stan"
+
+eval:
+  metrics: ["brier", "rps", "auc"]
+  aggregate: ["daily", "weekly"]
+  n_plot_cases: 3

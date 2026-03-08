@@ -1,0 +1,88 @@
+run:
+  cutoff_mode: "mok"
+  MR: true
+  training_years: [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+                   2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+                   2020, 2021, 2022, 2023, 2024]
+  true_holdout_years: []
+  cv_holdout_years: [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+                     2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+                     2020, 2021, 2022, 2023, 2024]
+
+cv:
+  methods: ["global"]
+
+models:
+  formulas:
+    ngcm_blend:
+      enabled: true
+      text: "outcome ~ prob_clim_mr_qx * diff_ngcm_qx"
+
+    int_all:
+      enabled: true
+      text: "outcome ~ prob_clim_mr_qx * diff_ngcm_qx * diff_aifs_qx"
+
+    blended_model:
+      enabled: true
+      text: "outcome ~ prob_clim_mr_qx * diff_ngcm_qx * diff_aifs_qx + min_ngcm_10day_qx + min_aifs_10day_qx"
+
+  window_variants:
+    enabled: true
+    only_if_cutoff_mode: "mok"
+    base_name: "blended_model"
+    start_years: [1900, 2000, 1990, 1980, 1970, 1960, 1950, 1940, 1930, 1920, 1910]
+    end_year: 2024
+    include_baseline_1900: true
+    replace:
+      from: "prob_clim_mr_qx"
+      to: "prob_clim_mr{window}_qx"
+
+mme:
+  enabled: true
+  variants: ["clim_mok_date"]
+  mc_cores: 25
+  blend_models:
+    - name: clim_raw
+      source: clim
+    - name: ngcm
+      source: forecast
+      cal_variant: clim_mok_date
+    - name: aifs
+      source: forecast
+      cal_variant: clim_mok_date
+
+extras:
+  clim_logits:
+    - name: unc_clim_raw
+      base_col_prefix: prob_clim_mr_unc
+      earlier_col: prob_clim_mr_unc_earlier   
+      earlier_is_logit: true
+
+    - name: clim_raw
+      base_col_prefix: prob_clim_mr
+      window_start_years: [1900, 2000, 1990, 1980, 1970, 1960, 1950, 1940, 1930, 1920, 1910]
+      window_end_year: 2024
+
+
+
+  forecasts:
+    - name: ngcm
+      variant: base
+      raw: true
+      calibrated: true
+      fair_brier: true
+      export_platt_weights: true
+    - name: ngcm
+      variant: clim_mok_date
+      raw: true
+      calibrated: true
+      fair_brier: true
+      export_platt_weights: true
+    - name: aifs
+      variant: clim_mok_date
+      raw: false
+      calibrated: true
+
+  forecast_variants:
+    base: ""
+    clim_mok_date: "_clim_mok_date"

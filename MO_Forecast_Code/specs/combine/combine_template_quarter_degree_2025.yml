@@ -1,0 +1,123 @@
+# ==============================================================================
+# Spec for combining climatology (IMD), NGCM, and AIFS forecasts at quarter-degree
+# combine_template_quarter_degree_2025.yml
+# Feeds into 3_combine_forecasts.R
+# ------------------------------------------------------------------------------
+# This YAML provides specs to produce data formatted for input into Monsoon Onset models
+# at 0.25-degree resolution.
+# ==============================================================================
+
+
+type: "combine_forecasts"
+
+input:
+  # onset date output (from 1_process_raw_nc_files.R with type ground_truth_rainfall)
+  ground_truth_wide_rds: "Monsoon_Data/Processed_Data/Models/imd_quarter_degree_wide.rds"
+
+  climatologies:
+    # Baseline conditional climatology (1900-2024) stays unnumbered
+    clim:
+      rds: "Monsoon_Data/Processed_Data/Climatology_quarter_degree/imd_quarter_degree_clim_issue.rds"
+      out_prefix: "clim_p_onset"
+
+    # Unconditional stays as-is
+    clim_unc:
+      rds: "Monsoon_Data/Processed_Data/Climatology_quarter_degree/imd_quarter_degree_clim_unc_issue.rds"
+      out_prefix: "clim_unc_p_onset"
+
+    clim_2000_2024:
+      rds: "Monsoon_Data/Processed_Data/Climatology_quarter_degree/imd_quarter_degree_clim_2000_2024_issue.rds"
+      out_prefix: "clim_2000_2024_p_onset"
+
+    clim_1990_2024:
+      rds: "Monsoon_Data/Processed_Data/Climatology_quarter_degree/imd_quarter_degree_clim_1990_2024_issue.rds"
+      out_prefix: "clim_1990_2024_p_onset"
+
+    clim_1980_2024:
+      rds: "Monsoon_Data/Processed_Data/Climatology_quarter_degree/imd_quarter_degree_clim_1980_2024_issue.rds"
+      out_prefix: "clim_1980_2024_p_onset"
+
+    clim_1970_2024:
+      rds: "Monsoon_Data/Processed_Data/Climatology_quarter_degree/imd_quarter_degree_clim_1970_2024_issue.rds"
+      out_prefix: "clim_1970_2024_p_onset"
+
+    clim_1960_2024:
+      rds: "Monsoon_Data/Processed_Data/Climatology_quarter_degree/imd_quarter_degree_clim_1960_2024_issue.rds"
+      out_prefix: "clim_1960_2024_p_onset"
+
+    clim_1950_2024:
+      rds: "Monsoon_Data/Processed_Data/Climatology_quarter_degree/imd_quarter_degree_clim_1950_2024_issue.rds"
+      out_prefix: "clim_1950_2024_p_onset"
+
+    clim_1940_2024:
+      rds: "Monsoon_Data/Processed_Data/Climatology_quarter_degree/imd_quarter_degree_clim_1940_2024_issue.rds"
+      out_prefix: "clim_1940_2024_p_onset"
+
+    clim_1930_2024:
+      rds: "Monsoon_Data/Processed_Data/Climatology_quarter_degree/imd_quarter_degree_clim_1930_2024_issue.rds"
+      out_prefix: "clim_1930_2024_p_onset"
+
+    clim_1920_2024:
+      rds: "Monsoon_Data/Processed_Data/Climatology_quarter_degree/imd_quarter_degree_clim_1920_2024_issue.rds"
+      out_prefix: "clim_1920_2024_p_onset"
+
+    clim_1910_2024:
+      rds: "Monsoon_Data/Processed_Data/Climatology_quarter_degree/imd_quarter_degree_clim_1910_2024_issue.rds"
+      out_prefix: "clim_1910_2024_p_onset"
+
+
+
+
+options:
+  join: "inner"   # "inner" (default) or "full" (inner join only keeps forecast dates/lats/lons where all forecasts are available
+
+  # How to label the plus bin, if max_day=28 -> "day_29plus"
+  plus_label_template: "day_{plus}plus"
+
+  #only include forecasts up to the true onset date (needed for onset forecasts)
+  trim_forecasts_after_true_onset: true
+  # Which prob column from rainfall_forecast to use
+  # ( stage-2 long has predicted_prob, predicted_prob_clim_mok_date, predicted_prob_mok)
+  default_prob_col: "predicted_prob"
+
+forecasts:
+  ngcm:
+    max_day: 40
+    sources:
+      - file: "Monsoon_Data/Processed_Data/Models/ngcm_quarter_degree_wide.rds"
+        years: "1965:2024"
+
+    #constant variables are constant per lat/lon/initialization date
+    # daily variables have different values for each day
+    constants:
+      - {col: "onset_thresh", out: "onset_thresh"}   # -> ngcm_onset_thresh
+      - {col: "mok_date",     out: "mok_date"}       # -> ngcm_mok_date
+
+    daily: #add_plus: add a "day_29plus" version which is 1- sum of others.
+      # add_plus generally makes sense for onset probabilites but not other things.
+      - {col: "predicted_prob",      out: "p_onset", add_plus: true}
+      - {col: "predicted_prob_clim_mok_date",      out: "p_onset_clim_mok_date", add_plus: true}
+      - {col: "forecast_rain",       out: "rain_mean", add_plus: false}
+
+  aifs:
+    max_day: 40
+    sources:
+      - file: "Monsoon_Data/Processed_Data/Models/aifs_quarter_degree_wide.rds"
+        years: "1965:2024"
+        prob_col: "predicted_prob_clim_mok_date"   # override per-source (optional)
+    daily: #add_plus: add a "day_29plus" version which is 1- sum of others.
+      # add_plus generally makes sense for onset probabilites but not other things.
+      - {col: "predicted_prob",      out: "p_onset", add_plus: true}
+      - {col: "predicted_prob_mok",      out: "p_onset_mok", add_plus: true}
+      - {col: "predicted_prob_clim_mok_date",      out: "p_onset_clim_mok_date", add_plus: true}
+      - {col: "forecast_rain",       out: "rain_mean", add_plus: false}
+
+#options for climatology files (same for all files)
+climatology:
+  max_day: 28
+  # optional override if climatology uses a different prob column name
+  prob_col: "predicted_prob"
+
+output:
+  out_dir: "Monsoon_Data/Processed_Data/Combined"
+  # basename derived from spec_id

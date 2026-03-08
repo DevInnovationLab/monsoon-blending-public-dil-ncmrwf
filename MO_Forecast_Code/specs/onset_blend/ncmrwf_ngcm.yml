@@ -1,0 +1,35 @@
+id: "ncmrwf_ngcm"
+data:
+  path: "Monsoon_Data/Processed_Data/Combined/mo_onset_combined_ncmrwf_combined_wide.rds"
+  year_min: 2000
+  year_max: 2015
+  filter_fn: "default_filter"
+targets:
+  max_day: 28
+  plus_label: "day_29plus"
+forecasts:
+  systems:
+    ngcm:
+      prefix: "ngcm_p_onset_day_"
+      plus_col: "ngcm_p_onset_day_29plus"
+    ncmrwf:
+      prefix: "ncmrwf_p_onset_day_"
+      plus_col: "ncmrwf_p_onset_day_37plus"
+climatology:
+  prefix: "clim_p_onset_day_"
+  plus_col: "clim_p_onset_day_29plus"
+smoothing:
+  ngcm: "none" # originally "unimodal_param"
+  ncmrwf: "none" # originally "unimodal_param"
+design:
+  formula: "clim + ngcm + ncmrwf"
+  priors:
+    clim: 2.0
+    ngcm: 2.0
+    ncmrwf: 2.0
+stan_model:
+  file: "stan/multinom_blocks.stan"
+eval:
+  metrics: ["brier", "rps", "auc"]
+  aggregate: ["daily", "weekly"]
+  n_plot_cases: 3
