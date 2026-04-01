@@ -1,0 +1,47 @@
+# ==============================================================================
+# Spec for NCMRWF rainfall forecasts at the 2 degree x 2 degree grid cell level
+# ncmrwf.yml
+# Feeds into 1_process_raw_nc_files.R
+# ------------------------------------------------------------------------------
+# NCMRWF is an India regional model with 6 ensemble members
+# Source data is at 1 degree, regridded to 2 degrees via conservative weights
+# ==============================================================================
+output:
+  out_dir: "Monsoon_Data/Processed_Data/Models"
+  # basename derived from spec_id
+type: "rainfall_forecast"
+input:
+  nc_folder: "Monsoon_Data/raw_nc/ncmrwf"
+  file_regex: ".*\\b(19|20)\\d{2}\\b.*\\.nc$"
+  value_col: "precip"
+  wide_day_dim: "day"
+  wide_prefix: "rain"
+  parallel: true
+  workers: 10
+dimensions:
+  rename:
+    latitude: "lat"
+    longitude: "lon"
+    time: "time"
+    day: "day"
+    number: "number"
+options:
+  window: 5
+  min_day: 1
+  max_day: 40
+  min_year: 2000
+  max_year: 2015
+  cell_transform_enabled: true
+  cell_transform_file: "Monsoon_Data/weights/ncmrwf_1deg_to_2deg_conservative.csv"
+thresholds:
+  file: "Monsoon_Data/reference/thresholds_df.csv"
+  lat_col: "lat"
+  lon_col: "lon"
+  thresh_col: "onset_threshold"
+mok:
+  file: "Monsoon_Data/reference/MOK Onset.csv"
+  year_col: "Year"
+  day_col: "MOK"
+  base_date: "05-01"
+filter:
+  max_number: 6

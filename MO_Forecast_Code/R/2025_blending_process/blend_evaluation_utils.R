@@ -571,7 +571,9 @@ summarize_models_pooled <- function(all_cells, baseline_model = "unc_clim_raw") 
     dplyr::mutate(
       brier_skill = 1 - (brier / brier_clim),
       rps_skill   = 1 - (rps   / rps_clim),
-      `AUC diff`  = (auc - auc_clim) * 100
+      `AUC diff`  = (auc - auc_clim) * 100,
+      cr_one_diff = (cr_one - clim_row$cr_one[1]) * 100,
+      cr_two_diff = (cr_two - clim_row$cr_two[1]) * 100
     )
 }
 
@@ -971,7 +973,7 @@ fast_auc <- function(y01, score) {
 }
 
 compute_cell_metrics_fast <- function(df, multinomial = TRUE, allowed_cells = NULL,
-                                      workers = 25L, parallel_auc = TRUE,
+                                      workers = 6L, parallel_auc = TRUE,
                                       print_outputs = TRUE,
                                       only_all = FALSE) {
   stopifnot(is.data.frame(df))
@@ -1039,6 +1041,19 @@ compute_cell_metrics_fast <- function(df, multinomial = TRUE, allowed_cells = NU
   brier_row <- matrixStats::rowSums2(err5)
   df$brier_row <- brier_row
 
+  # cr_one: does the highest-probability bin match the true outcome?
+  cr_one_row <- as.integer(max.col(prob5, ties.method = "first") == j5)
+  cr_one_row[is.na(j5)] <- NA_integer_
+  df$cr_one_row <- cr_one_row
+
+  # cr_two: does the best contiguous 2-bin pair contain the true outcome?
+  n_bins <- ncol(prob5)
+  pair_sums <- prob5[, -n_bins, drop = FALSE] + prob5[, -1L, drop = FALSE]  # n × 4
+  best_pair_start <- max.col(pair_sums, ties.method = "first")              # which pair
+  cr_two_row <- as.integer(j5 == best_pair_start | j5 == best_pair_start + 1L)
+  cr_two_row[is.na(j5)] <- NA_integer_
+  df$cr_two_row <- cr_two_row
+
   idx_all <- seq_len(n)
   if (!is.null(allowed_cells)) {
     allowed_ids <- allowed_cells %>%
@@ -1080,6 +1095,8 @@ compute_cell_metrics_fast <- function(df, multinomial = TRUE, allowed_cells = NU
     brier  = sum(err5_all, na.rm = TRUE) / nrow(err5_all),
     rps    = mean(rps_all, na.rm = TRUE),
     auc    = auc_all,
+    cr_one = mean(cr_one_row[idx_all], na.rm = TRUE),
+    cr_two = mean(cr_two_row[idx_all], na.rm = TRUE),
     n      = length(idx_all),
     pietra = pietra
   )
@@ -1098,9 +1115,11 @@ compute_cell_metrics_fast <- function(df, multinomial = TRUE, allowed_cells = NU
   cell_base <- dt[, .(
     lat   = lat[1L],
     lon   = lon[1L],
-    brier = mean(brier_row, na.rm = TRUE),
-    rps   = mean(rps_row, na.rm = TRUE),
-    n     = .N
+    brier  = mean(brier_row, na.rm = TRUE),
+    rps    = mean(rps_row, na.rm = TRUE),
+    cr_one = mean(cr_one_row, na.rm = TRUE),
+    cr_two = mean(cr_two_row, na.rm = TRUE),
+    n      = .N
   ), by = .(id)]
 
   split_idx <- split(seq_len(n), dt$id)
@@ -1335,7 +1354,7 @@ compute_yearly_from_preds <- function(pred_df, model_name, allowed_cells = NULL)
                                   allowed_cells = allowed_cells,
                                   only_all = TRUE,
                                   print_outputs = FALSE) %>%
-        dplyr::select(brier, rps, auc) %>%
+        dplyr::select(brier, rps, auc, cr_one, cr_two) %>%
         dplyr::slice(1)
     ) %>%
     dplyr::ungroup() %>%

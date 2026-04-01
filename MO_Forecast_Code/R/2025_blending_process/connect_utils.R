@@ -286,7 +286,8 @@ make_cv_rds_from_daylevel <- function(spec) {
     if (length(rain_preds) == 0) next
 
     # Build rain matrix
-    need_rain <- paste0(model_name, "_rain_mean_day_", 1:(day_max + 10))
+    rain_day_max <- fm$rain_day_max %||% (day_max + 10)
+    need_rain <- paste0(model_name, "_rain_mean_day_", 1:rain_day_max)
     if (!all(need_rain %in% names(raw))) {
       stop("Missing ", model_name, " rain columns: ", paste(setdiff(need_rain, names(raw)), collapse = ", "))
     }

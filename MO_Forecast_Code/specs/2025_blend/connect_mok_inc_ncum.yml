@@ -1,0 +1,19 @@
+mode: "mok"
+input_rds: "Monsoon_Data/Processed_Data/Combined/combine_template_2025_inc_ncum_combined_wide.rds"
+output_rds: "Monsoon_Data/Processed_Data/2025_pipeline_input/cv_data_new_pipeline.rds"
+day_max: 28
+days_per_week: 7
+n_weeks: 4
+
+climatology:
+  base_prefix: "clim"
+  unconditional_prefix: "clim_unc"
+  
+forecast_models:
+  - name: ncmrwf
+    variants: [clim_mok_date]
+    rain_predictors: [diff_5day, min_10day]
+    rain_day_max: 36
+  - name: aifs
+    variants: [clim_mok_date]
+    rain_predictors: [diff_5day, min_10day, max_5day]
