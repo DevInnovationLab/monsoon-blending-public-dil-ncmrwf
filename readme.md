@@ -1,4 +1,5 @@
 # Replication Package: Designing probabilistic AI monsoon forecasts to inform agricultural decision-making
+This is a fork of the monsoon-blending-public repository, modified to perform an NCUM/AIFS blnd instead of AIFS/NeuralGCM. Please contact Colin Aitken (caitken@uchicago.edu) for data to run this code if needed. 
 
 Replication code for probabilistic Indian monsoon onset forecasts that blend rainfall observations (IMD) with AI weather prediction model forecasts (NeuralGCM, AIFS) through multinomial blending models. This package reproduces all results from data preparation through cross-validated evaluation to publication figures. See ``Running the Pipeline'' below for more information.
 
