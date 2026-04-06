@@ -181,8 +181,18 @@ read_thresholds <- function(spec) {
     return(normalize_thr(mat_lat, mat_lon, onset_thresh))
   }
   
-  # ---- CSV/TSV thresholds (your current style) ----
+  # ---- CSV/TSV thresholds ----
   th <- data.table::fread(f)
+  
+  # if id_col is specified, use it directly (e.g. subdistrict OBJECTID)
+  ic <- spec$thresholds$id_col
+  if (!is.null(ic)) {
+    tc <- spec$thresholds$thresh_col %||% "onset_thresh"
+    if (!(ic %in% names(th)) || !(tc %in% names(th)))
+      stop("Threshold file must contain columns ", ic, ", ", tc, call. = FALSE)
+    data.table::setnames(th, c(ic, tc), c("id", "onset_thresh"))
+    return(unique(th[, .(id, onset_thresh)]))
+  }
   
   lc <- spec$thresholds$lat_col %||% "lat"
   oc <- spec$thresholds$lon_col %||% "lon"

@@ -309,17 +309,17 @@ make_cv_rds_from_daylevel <- function(spec) {
       if (pred_type == "diff_5day") {
         for (w in seq_len(n_weeks)) {
           col_name <- paste0("diff_", model_name, "_week", w)
-          rain_predictors_list[[col_name]] <- max5_by_week[[w]] - raw$onset_threshold
+          rain_predictors_list[[col_name]] <- (max5_by_week[[w]])^0.25 - (raw$onset_threshold)^0.25
         }
       } else if (pred_type == "min_10day") {
         for (w in seq_len(n_weeks)) {
           col_name <- paste0("min_", model_name, "_10day_week", w)
-          rain_predictors_list[[col_name]] <- min10_by_week[[w]]
+          rain_predictors_list[[col_name]] <- (min10_by_week[[w]])^0.25
         }
       } else if (pred_type == "max_5day") {
         for (w in seq_len(n_weeks)) {
           col_name <- paste0("max_", model_name, "_5day_week", w)
-          rain_predictors_list[[col_name]] <- max5_by_week[[w]]
+          rain_predictors_list[[col_name]] <- (max5_by_week[[w]])^0.25
         }
       } else {
         stop("Unknown rain predictor type: ", pred_type)

@@ -15,20 +15,29 @@ set -euo pipefail
 
 log() { echo "[$(date '+%H:%M:%S')] $*"; }
 
-log "Stage 1+2: IMD ground truth"
-Rscript pipelines/prepare_data/1_process_raw_nc_files.R --spec_id imd
-log "  1_process_raw_nc_files (imd) done"
-Rscript pipelines/prepare_data/2_build_climatology.R --spec_id imd
-log "  2_build_climatology (imd) done"
-
 
 log "Stage 1: NCUM forecasts"
 Rscript pipelines/prepare_data/1_process_raw_nc_files.R --spec_id ncmrwf
 log "  1_process_raw_nc_files (ncum) done"
 
+log "Stage 1: NCUM forecasts"
+Rscript pipelines/prepare_data/1_process_raw_nc_files.R --spec_id ncmrwf_post_2018
+log "  1_process_raw_nc_files (new ncum data) done"
+
+
 log "Stage 1: AIFS forecasts"
-Rscript pipelines/prepare_data/1_process_raw_nc_files.R --spec_id aifs
+Rscript pipelines/prepare_data/1_process_raw_nc_files.R --spec_id aifs_pre_2020
 log "  1_process_raw_nc_files (aifs) done"
+
+log "Stage 1: AIFS forecasts"
+Rscript pipelines/prepare_data/1_process_raw_nc_files.R --spec_id aifs_post_2020
+log "  1_process_raw_nc_files (new aifs) done"
+
+log "Stage 1+2: IMD ground truth"
+Rscript pipelines/prepare_data/1_process_raw_nc_files.R --spec_id imd
+log "  1_process_raw_nc_files (imd) done"
+Rscript pipelines/prepare_data/2_build_climatology.R --spec_id imd
+log "  2_build_climatology (imd) done"
 
 log "Stage 3: Combine datasets"
 Rscript pipelines/prepare_data/3_combine_datasets.R --spec_id combine_template_2025_inc_ncum

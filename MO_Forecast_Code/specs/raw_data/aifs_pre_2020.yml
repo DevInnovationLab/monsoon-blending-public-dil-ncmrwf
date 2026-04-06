@@ -41,7 +41,7 @@ input:
   wide_prefix: "rain"
 
   # Parallelism
-  parallel: true
+  parallel: false
   # If parallel: true, number of workers (optional, defaults to 5 otherwise)
   workers: 25
 

@@ -1,5 +1,5 @@
 # ==============================================================================
-# Spec for combining climatology (IMD), NGCM, and AIFS  forecasts at the 2 degree grid cell level
+# Spec for combining climatology (IMD), NCMRWF, and AIFS  forecasts at the 2 degree grid cell level
 # combine_template.yml
 # Feeds into 3_combine_forecasts.R
 # ------------------------------------------------------------------------------
@@ -59,8 +59,10 @@ forecasts:
   aifs:
     max_day: 40
     sources:
-      - file: "Monsoon_Data/Processed_Data/Models/aifs_wide.rds"
-        years: "1965:2024"
+      - file: "Monsoon_Data/Processed_Data/Models/aifs_pre_2020_wide.rds"
+        years: "2000:2019"
+      - file: "Monsoon_Data/Processed_Data/Models/aifs_post_2020_wide.rds"
+        years: "2020:2025"
         prob_col: "predicted_prob_clim_mok_date"   # override per-source (optional)
     daily: #add_plus: add a "day_29plus" version which is 1- sum of others. 
       # add_plus generally makes sense for onset probabilites but not other things.
@@ -73,6 +75,8 @@ forecasts:
     sources:
       - file: "Monsoon_Data/Processed_Data/Models/ncmrwf_wide.rds"
         years: "2000:2015"
+      - file: "Monsoon_Data/Processed_Data/Models/ncmrwf_post_2018_wide.rds"
+        years: "2018:2025"
     daily:
       - {col: "predicted_prob",               out: "p_onset",               add_plus: true}
       - {col: "predicted_prob_clim_mok_date", out: "p_onset_clim_mok_date", add_plus: true}

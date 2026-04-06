@@ -39,11 +39,11 @@ suppressPackageStartupMessages({
   library(colorspace)
   library(yaml)
   library(parallel)
+  library(here)
   library(nnet)
   library(tibble)
 })
 
-path_box <- "Monsoon_Data/results/2025_model_evaluation"
 
 # Project functions and utilities
 source("R/2025_blending_process/blend_evaluation_utils.R")
@@ -60,8 +60,9 @@ if (!interactive()) {
   spec_id <- opt$spec_id
   if (!is.null(opt$cores)) options(mc.cores = opt$cores)
 } else {
-  spec_id <- "hindcast_1965_1978_no_mok_filter"
+  spec_id <- "cv_models_inc_ncum_new_data"
 }
+path_box <- here("Monsoon_Data/results/2025_model_evaluation", spec_id)
 
 # ---- Read spec ----
 spec_path <- file.path("specs", "2025_blend", paste0(spec_id, ".yml"))
@@ -84,7 +85,7 @@ output_tag <- paste0(cutoff_tag, year_tag)
 dissemination_cells <- readr::read_csv("Monsoon_Data/dissemination_cells.csv", show_col_types = FALSE) %>%
   dplyr::transmute(lat = as.numeric(lat), lon = as.numeric(lon)) %>%
   dplyr::distinct() %>%
-  dplyr::mutate(id = paste0(lat, "_", lon))
+  dplyr::mutate(id = sprintf("%.2f_%.2f", lat, lon))
 
 # ---- India boundary ----
 india_boundary <- read.csv("Monsoon_Data/india_boundary_for_ggplot.csv") %>%
@@ -96,7 +97,6 @@ input_rds_file <- input_rds_from_cutoff(cutoff_mode)
 tictoc::tic()
 wide_df <- readr::read_rds(file.path("Monsoon_Data/Processed_Data/2025_pipeline_input", input_rds_file)) %>%
   dplyr::filter(!is.na(outcome))
-
 # ---- Build formula models from spec ----
 formulas_list <- build_formulas_from_spec(spec, cutoff_mode)
 model_names <- names(formulas_list)

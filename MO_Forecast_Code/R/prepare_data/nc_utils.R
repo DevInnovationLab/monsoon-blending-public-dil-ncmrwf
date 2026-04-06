@@ -440,9 +440,9 @@ add_id_from_latlon <- function(dt, lat_col = "lat", lon_col = "lon", id_col = "i
     stop("Cannot create id: missing columns ", lat_col, " and/or ", lon_col, call. = FALSE)
   }
   dt[, (id_col) := paste0(
-    format(get(lat_col), scientific = FALSE, trim = TRUE),
+    format(round(get(lat_col), 2), scientific = FALSE, trim = TRUE, nsmall = 2),
     "_",
-    format(get(lon_col), scientific = FALSE, trim = TRUE)
+    format(round(get(lon_col), 2), scientific = FALSE, trim = TRUE, nsmall = 2)
   )]
   dt
 }
@@ -531,7 +531,7 @@ transform_forecast_wide <- function(dt, weights_dt) {
   long <- merge(long, weights_dt, by.x = "id", by.y = "source_id", allow.cartesian = TRUE)
   
   # Aggregate across ALL source cells contributing to the same target cell
-  trans <- long[, .(rain = sum(weight * rain)),
+  trans <- long[, .(rain = sum(weight * rain, na.rm = TRUE)),
                 by = c(meta_cols, "target_id", "day_col")]
   
   # rename target_id -> id
@@ -625,7 +625,7 @@ dim_vals <- purrr::map(dims, function(d) {
   if (length(day_idx) != 1L) stop("Could not identify day dimension (after rename).", call. = FALSE)
   
   perm <- c(setdiff(seq_along(dims), day_idx), day_idx)
-  arr <- ncdf4::ncvar_get(nc, var_name)
+  arr <- ncdf4::ncvar_get(nc, var_name, collapse_degen = FALSE)
   arrp <- aperm(arr, perm)
   
   day_vals <- dim_vals[[ names(dim_vals)[day_idx] ]]
@@ -713,7 +713,7 @@ nc_read_groundtruth_long <- function(nc_path, var_name, dim_rename_map, add_year
   names(dim_vals) <- dim_names
   
   grid <- do.call(expand.grid, c(dim_vals, list(KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)))
-  arr <- ncdf4::ncvar_get(nc, var_name)
+  arr <- ncdf4::ncvar_get(nc, var_name, collapse_degen = FALSE)
   val <- as.vector(arr)
   if (nrow(grid) != length(val)) stop("Dimension grid mismatch for ", var_name, " in ", nc_path, call. = FALSE)
   

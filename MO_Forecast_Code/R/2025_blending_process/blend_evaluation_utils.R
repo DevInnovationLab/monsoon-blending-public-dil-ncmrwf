@@ -1088,7 +1088,11 @@ compute_cell_metrics_fast <- function(df, multinomial = TRUE, allowed_cells = NU
   obs_all   <- as.integer(c(obs5_all))
   pos <- preds_all[obs_all == 1L]
   neg <- preds_all[obs_all == 0L]
-  pietra <- as.numeric(suppressWarnings(stats::ks.test(pos, neg)$statistic))
+  if(min(pos, neg) >= 5){  
+    pietra <- as.numeric(suppressWarnings(stats::ks.test(pos, neg)$statistic))
+  }else{
+    pietra <- NA
+  }
 
   full_metrics <- data.table::data.table(
     id = "ALL", lat = NA_character_, lon = NA_character_,

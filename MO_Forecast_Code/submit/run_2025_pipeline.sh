@@ -28,6 +28,15 @@ log "  0_connect (mok) done"
 
 log "Step 1: CV evaluation (mok)"
 Rscript pipelines/2025_blending_process/1_blend_evaluation.R --spec_id cv_models_inc_ncum
+log "  CV 2000-2024 (mok) done"
+
+log "Step 1: CV evaluation (mok)"
+Rscript pipelines/2025_blending_process/1_blend_evaluation.R --spec_id cv_models_inc_ncum_new_data
+log "  CV 2018-2024 (mok) done"
+
+log "Step 1: CV evaluation (mok)"
+Rscript pipelines/2025_blending_process/1_blend_evaluation.R --spec_id cv_models_inc_ncum_pre_2018
 log "  CV 2000-2015 (mok) done"
+
 
 log "2025 pipeline complete"
