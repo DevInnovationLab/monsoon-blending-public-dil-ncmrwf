@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Bash(for f in \"R/_shared/read_spec.R\" \"R/_shared/registries.R\" \"R/_shared/smoothers.R\" \"R/_shared/likelihood.R\" \"R/_shared/scoring_funs.R\" \"R/_shared/misc.R\" \"R/_shared/regression_builder.R\" \"R/2026_blending_process/multinom_utils.R\" \"pipelines/2025_blending_process/funs.R\" \"R/2025_blending_process/blend_evaluation_utils.R\" \"R/2025_blending_process/blend_figure_utils.R\" \"R/prepare_data/onset_utils.R\" \"R/prepare_data/nc_utils.R\" \"R/prepare_data/climatology_utils.R\" \"R/prepare_data/combine_forecasts_utils.R\")",
+      "Bash(do)",
+      "Bash(if [ -f \"$f\" ])",
+      "Bash(then)",
+      "Bash(echo:*)",
+      "Bash(else)",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(for:*)",
+      "Bash([ -f \"$f\" ])",
+      "Bash(ls:*)",
+      "Bash(git mv:*)",
+      "Bash(find:*)",
+      "Bash(file:*)",
+      "Bash(grep:*)",
+      "Bash(python3:*)",
+      "Bash(git checkout:*)",
+      "Bash(if [ -d \"Monsoon_Data/weights\" ])",
+      "Bash(then ls -la Monsoon_Data/weights/)",
+      "Bash(else echo \"Monsoon_Data/weights does not exist\")",
+      "Bash(do echo \"=== $commit ===\")",
+      "Bash(xxd:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(\"/c/Program Files/R/R-4.3.2/bin/Rscript.exe\" -e \"tryCatch\\(parse\\(''pipelines/2025_blending_process/3b_quick_figures.R''\\), error = function\\(e\\) stop\\(e$message\\)\\); cat\\(''Parse OK\\\\n''\\)\")",
+      "Bash(\"/c/Program Files/R/R-4.3.2/bin/Rscript.exe\" -e 'tryCatch\\(parse\\(\"\"pipelines/2025_blending_process/3b_quick_figures.R\"\"\\), error = function\\(e\\) stop\\(e$message\\)\\); cat\\(\"\"Parse OK\\\\n\"\"\\)')",
+      "Bash(chmod:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(dos2unix:*)"
+    ]
+  }
+}

@@ -116,9 +116,9 @@ climatologies:
     onset_col: "mr_onset_day"
     conditional: true
     train_year_min: 1900
-    train_year_max: 2024
-    test_year_min: 1965
-    test_year_max: 2024
+    train_year_max: 2025
+    test_year_min: 2000
+    test_year_max: 2025
     season_start_md: "05-01"
     issue_end_md: "07-31"
     forecast_window: 28
@@ -128,9 +128,9 @@ climatologies:
     onset_col: "mr_onset_day"
     conditional: false
     train_year_min: 1900
-    train_year_max: 2024
-    test_year_min: 1965
-    test_year_max: 2024
+    train_year_max: 2025
+    test_year_min: 2000
+    test_year_max: 2025
     season_start_md: "05-01"
     issue_end_md: "07-31"
     forecast_window: 28
